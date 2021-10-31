@@ -1,0 +1,46 @@
+{
+  "name": "crowdloop-server",
+  "version": "1.0.0",
+  "description": "Server for a distributed loop pedal that plays back through audience phones",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node .",
+    "lint": "eslint src/**/*.ts",
+    "format": "eslint src/**/*.ts --fix",
+    "prepare": "husky install",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gzinck/crowdloop-server.git"
+  },
+  "keywords": [
+    "music",
+    "audience",
+    "participation",
+    "performance",
+    "live",
+    "coding"
+  ],
+  "author": "Graeme Zinck",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gzinck/crowdloop-server/issues"
+  },
+  "homepage": "https://github.com/gzinck/crowdloop-server#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "prettier": "^2.4.1",
+    "typescript": "^4.4.4"
+  }
+}
