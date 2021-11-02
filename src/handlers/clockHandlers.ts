@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import Storage from '../adapters/Storage';
-import * as ROUTES from '../routes';
+import * as events from '../events';
 
 interface PongReq {
   sessionID: string;
@@ -13,7 +13,7 @@ const getClockID = (sessionID: string) => `clock-${sessionID}`;
 const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
   // Make sure the host calls this before any clients do
   const getClock = () => {
-    socket.emit(ROUTES.CLOCK_PING_ROUTE, {
+    socket.emit(events.CLOCK_PING, {
       startTime: performance.now(),
     });
   };
@@ -37,7 +37,7 @@ const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
 
     storage.get(getClockID(req.sessionID)).then((data) => {
       const hostDelta = +data;
-      socket.to(socket.id).emit(ROUTES.CLOCK_GET_ROUTE, clientDelta - hostDelta);
+      socket.to(socket.id).emit(events.CLOCK_GET, clientDelta - hostDelta);
     });
   };
 

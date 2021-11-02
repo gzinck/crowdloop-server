@@ -1,11 +1,11 @@
 import { Server, Socket } from 'socket.io';
 import Storage from '../adapters/Storage';
-import * as ROUTES from '../routes';
+import * as events from '../events';
 
 const sessionHandlers = (io: Server, socket: Socket, storage: Storage) => {
   // @TODO: create a session ID to return back and create a room
   const createSession = () => {
-    socket.emit(ROUTES.CLOCK_PING_ROUTE, {
+    socket.emit(events.CLOCK_PING, {
       startTime: performance.now(),
     });
   };
@@ -20,7 +20,7 @@ const sessionHandlers = (io: Server, socket: Socket, storage: Storage) => {
     // @TODO: delete all of the data from redis
     // THIS IS A BIG DEAL. Need to refactor with a DAL.
     storage.del(sessionID);
-    io.to(sessionID).emit(ROUTES.SESSION_DELETE_ROUTE);
+    io.to(sessionID).emit(events.SESSION_DELETE);
   };
 
   return {

@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import Storage from '../adapters/Storage';
-import * as ROUTES from '../routes';
+import * as events from '../events';
 
 const getAudioID = (sessionID: string, id: string, packet?: number): string => {
   return `audiofile-${sessionID}-${id}${packet !== undefined ? `-${packet}` : ''}`;
@@ -9,6 +9,10 @@ const getAudioID = (sessionID: string, id: string, packet?: number): string => {
 interface AudioMetadata {
   sessionID: string;
   loopID: string;
+}
+
+interface AudioPlayRequest extends AudioMetadata {
+  startTime: number;
 }
 
 interface CreateAudioMetadata extends AudioMetadata {
@@ -23,12 +27,18 @@ interface DeleteAudioMetadata extends AudioMetadata {
   nPackets: number;
 }
 
-interface AudioPacketMetadata extends AudioMetadata {
+interface AudioPacketIdentifier extends AudioMetadata {
   packet: number;
 }
 
-interface AudioPacket extends AudioPacketMetadata {
-  file: Blob;
+interface PacketMetadata {
+  head: number;
+  length: number;
+}
+
+interface AudioPacket extends AudioPacketIdentifier {
+  file: Uint8Array;
+  meta: PacketMetadata;
 }
 
 /**
@@ -39,14 +49,18 @@ interface AudioPacket extends AudioPacketMetadata {
  */
 const audioHandlers = (io: Server, socket: Socket, storage: Storage) => {
   // TODO add auth for the following endpoints
-  const playAudio = (req: AudioMetadata) => {
+  const playAudio = (req: AudioPlayRequest) => {
+    // TODO: consider what happens if someone makes a playListRequest. They will not
+    // see the time each loop is supposed to start playing because they just see
+    // that it is playing---it's in the set below. Consider leveraging the
+    // startTime in the request above
     storage.sadd(`session-playing-${req.sessionID}`, req.loopID);
-    io.to(req.sessionID).emit(ROUTES.AUDIO_PLAY_ROUTE, req);
+    io.to(req.sessionID).emit(events.AUDIO_PLAY, req);
   };
 
   const stopAudio = (req: AudioMetadata) => {
     storage.srem(`session-playing-${req.sessionID}`, req.loopID);
-    io.to(req.sessionID).emit(ROUTES.AUDIO_STOP_ROUTE, req);
+    io.to(req.sessionID).emit(events.AUDIO_STOP, req);
   };
 
   const createAudio = (meta: CreateAudioMetadata): void => {
@@ -57,19 +71,18 @@ const audioHandlers = (io: Server, socket: Socket, storage: Storage) => {
     storage.sadd(`session-playing-${meta.sessionID}`, id);
 
     // Publish the new audio data to the room
-    io.to(meta.sessionID).emit(ROUTES.AUDIO_CREATE_ROUTE, meta);
+    io.to(meta.sessionID).emit(events.AUDIO_CREATE, meta);
   };
 
   const setAudio = (audio: AudioPacket): void => {
     const id = getAudioID(audio.sessionID, audio.loopID, audio.packet);
 
     // Serialize the data and save it
-    audio.file.arrayBuffer().then((buf) => {
-      storage.set(id, new Buffer(buf));
-    });
+    storage.set(`${id}-meta`, JSON.stringify(audio.meta));
+    storage.set(id, Buffer.from(audio.file));
 
     // Publish the new audio data to the room
-    io.to(audio.sessionID).emit(ROUTES.AUDIO_SET_ROUTE, audio);
+    io.to(audio.sessionID).emit(events.AUDIO_SET, audio);
   };
 
   const deleteAudio = (req: DeleteAudioMetadata): void => {
@@ -95,13 +108,13 @@ const audioHandlers = (io: Server, socket: Socket, storage: Storage) => {
 
   const listAudio = (sessionID: string): void => {
     storage.smembers(`session-${sessionID}`).then((audioIDs) => {
-      socket.to(socket.id).emit(ROUTES.AUDIO_LIST_ROUTE, audioIDs);
+      socket.to(socket.id).emit(events.AUDIO_LIST, audioIDs);
     });
   };
 
   const playListAudio = (sessionID: string): void => {
     storage.smembers(`session-playing-${sessionID}`).then((audioIDs) => {
-      socket.to(socket.id).emit(ROUTES.AUDIO_PLAY_LIST_ROUTE, audioIDs);
+      socket.to(socket.id).emit(events.AUDIO_PLAY_LIST, audioIDs);
     });
   };
 
@@ -110,22 +123,27 @@ const audioHandlers = (io: Server, socket: Socket, storage: Storage) => {
 
     storage.get(id).then((metaStr) => {
       const meta: CreateAudioMetadata = JSON.parse(metaStr);
-      socket.to(socket.id).emit(ROUTES.AUDIO_META_GET_ROUTE, meta);
+      socket.to(socket.id).emit(events.AUDIO_META_GET, meta);
     });
   };
 
-  const getAudio = (req: AudioPacketMetadata): void => {
+  const getAudio = (req: AudioPacketIdentifier): void => {
     const id = getAudioID(req.sessionID, req.loopID, req.packet);
 
     // Fetch the data and put it into the appropriate format
-    storage.getBuffer(id).then((buff) => {
-      const blob = new Blob([Uint8Array.from(buff).buffer]);
+    const metaPromise = storage.get(`${id}-meta`);
+    const filePromise = storage.getBuffer(id)
+
+    Promise.all([metaPromise, filePromise]).then(([metaStr, buff]) => {
+      const meta: PacketMetadata = JSON.parse(metaStr);
+      const file = Uint8Array.from(buff);
       const response: AudioPacket = {
         ...req,
-        file: blob,
+        file,
+        meta,
       };
 
-      socket.to(socket.id).emit(ROUTES.AUDIO_SET_ROUTE, response);
+      socket.to(socket.id).emit(events.AUDIO_SET, response);
     });
   };
 
