@@ -6,6 +6,10 @@ class Logger {
   public static warning(message: string) {
     console.log(message);
   }
+
+  public static info(message: string) {
+    console.log(message);
+  }
 }
 
 export default Logger;

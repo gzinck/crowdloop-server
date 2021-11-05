@@ -26,7 +26,7 @@ const sessionStorage = sessionDAL(storage);
 
 const onConnection = (socket: Socket) => {
   const audio = audioHandlers(io, socket, audioStorage);
-  const clock = clockHandlers(io, socket, clockStorage);
+  const clock = clockHandlers(io, socket, clockStorage, sessionStorage);
   const session = sessionHandlers(io, socket, sessionStorage, audioStorage, clockStorage);
 
   // Audio routes -- closed

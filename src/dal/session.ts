@@ -3,6 +3,7 @@ import Storage from '../adapters/Storage';
 export interface SessionDAL {
   addToSession: (sessionID: string, socketID: string) => void;
   removeFromSession: (sessionID: string, socketID: string) => void;
+  getSessionMembers: (sessionID: string) => Promise<string[]>;
   deleteSession: (sessionID: string) => void;
 }
 
@@ -15,6 +16,10 @@ const sessionDAL = (storage: Storage): SessionDAL => {
     storage.srem(sessionID, socketID);
   };
 
+  const getSessionMembers = (sessionID: string): Promise<string[]> => {
+    return storage.smembers(sessionID);
+  };
+
   const deleteSession = (sessionID: string): void => {
     storage.del(sessionID);
   };
@@ -22,6 +27,7 @@ const sessionDAL = (storage: Storage): SessionDAL => {
   return {
     addToSession,
     removeFromSession,
+    getSessionMembers,
     deleteSession,
   };
 };
