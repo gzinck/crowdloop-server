@@ -1,9 +1,16 @@
 import { Server, Socket } from 'socket.io';
-import Storage from '../adapters/Storage';
 import { AudioDAL } from '../dal/audio';
+import { SessionDAL } from '../dal/session';
+import { ClockDAL } from '../dal/clock';
 import * as events from '../events';
 
-const sessionHandlers = (io: Server, socket: Socket, storage: Storage, audioStorage: AudioDAL) => {
+const sessionHandlers = (
+  io: Server,
+  socket: Socket,
+  sessionStorage: SessionDAL,
+  audioStorage: AudioDAL,
+  clockStorage: ClockDAL,
+) => {
   // @TODO: create a session ID to return back and create a room
   const createSession = () => {
     socket.emit(events.CLOCK_PING, {
@@ -13,21 +20,31 @@ const sessionHandlers = (io: Server, socket: Socket, storage: Storage, audioStor
 
   // @TODO: make sure the room exists
   const joinSession = (sessionID: string) => {
-    storage.sadd(sessionID, socket.id);
+    sessionStorage.addToSession(sessionID, socket.id);
     socket.join(sessionID);
   };
 
   const deleteSession = (sessionID: string) => {
     audioStorage.deleteAll(sessionID);
-    storage.del(`${sessionID}-clock`); // @TODO refactor with dal
-    storage.del(sessionID);
+    clockStorage.deleteClock(sessionID);
+    sessionStorage.deleteSession(sessionID);
     io.to(sessionID).emit(events.SESSION_DELETE);
+  };
+
+  const leaveAllSessions = () => {
+    for (const sessionID of socket.rooms) {
+      if (sessionID !== socket.id) {
+        // leave the session
+        sessionStorage.removeFromSession(sessionID, socket.id);
+      }
+    }
   };
 
   return {
     createSession,
     joinSession,
     deleteSession,
+    leaveAllSessions,
   };
 };
 

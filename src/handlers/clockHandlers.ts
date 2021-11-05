@@ -1,5 +1,5 @@
 import { Server, Socket } from 'socket.io';
-import Storage from '../adapters/Storage';
+import { ClockDAL } from '../dal/clock';
 import * as events from '../events';
 
 interface PongReq {
@@ -8,9 +8,7 @@ interface PongReq {
   clientTime: number;
 }
 
-const getClockID = (sessionID: string) => `${sessionID}-clock`;
-
-const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
+const clockHandlers = (io: Server, socket: Socket, clockStorage: ClockDAL) => {
   // Make sure the host calls this before any clients do
   const getClock = () => {
     socket.emit(events.CLOCK_PING, {
@@ -26,7 +24,7 @@ const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
 
     // To get the time on the host, take serverTime and subtract hostDelta
     const hostDelta = serverTime - hostTime;
-    storage.set(getClockID(req.sessionID), `${hostDelta}`);
+    clockStorage.setHostDelta(req.sessionID, hostDelta);
   };
 
   const pong = (req: PongReq) => {
@@ -35,8 +33,7 @@ const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
     const clientTime = req.clientTime + clientLatency;
     const clientDelta = serverTime - clientTime;
 
-    storage.get(getClockID(req.sessionID)).then((data) => {
-      const hostDelta = +data;
+    clockStorage.getHostDelta(req.sessionID).then((hostDelta) => {
       socket.emit(events.CLOCK_GET, clientDelta - hostDelta);
     });
   };

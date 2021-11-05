@@ -2,6 +2,8 @@ import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import Storage from './adapters/Storage';
 import audioDAL from './dal/audio';
+import clockDAL from './dal/clock';
+import sessionDAL from './dal/session';
 import * as events from './events';
 import audioHandlers from './handlers/audioHandlers';
 import clockHandlers from './handlers/clockHandlers';
@@ -19,11 +21,13 @@ const io = new Server(httpServer, {
 
 const storage = new Storage();
 const audioStorage = audioDAL(storage);
+const clockStorage = clockDAL(storage);
+const sessionStorage = sessionDAL(storage);
 
 const onConnection = (socket: Socket) => {
   const audio = audioHandlers(io, socket, audioStorage);
-  const clock = clockHandlers(io, socket, storage);
-  const session = sessionHandlers(io, socket, storage, audioStorage);
+  const clock = clockHandlers(io, socket, clockStorage);
+  const session = sessionHandlers(io, socket, sessionStorage, audioStorage, clockStorage);
 
   // Audio routes -- closed
   socket.on(events.AUDIO_PLAY, audio.playAudio);
@@ -48,6 +52,7 @@ const onConnection = (socket: Socket) => {
 
   // Session routes -- open
   socket.on(events.SESSION_JOIN, session.joinSession);
+  socket.on(events.DISCONNECTING, session.leaveAllSessions);
 };
 
 io.on('connection', onConnection);

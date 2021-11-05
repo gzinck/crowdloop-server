@@ -21,3 +21,4 @@ export const CLOCK_PING = 'clock:ping';
 export const SESSION_CREATE = 'session:create';
 export const SESSION_JOIN = 'session:join';
 export const SESSION_DELETE = 'session:delete';
+export const DISCONNECTING = 'disconnecting';
