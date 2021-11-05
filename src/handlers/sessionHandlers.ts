@@ -1,8 +1,9 @@
 import { Server, Socket } from 'socket.io';
 import Storage from '../adapters/Storage';
+import { AudioDAL } from '../dal/audio';
 import * as events from '../events';
 
-const sessionHandlers = (io: Server, socket: Socket, storage: Storage) => {
+const sessionHandlers = (io: Server, socket: Socket, storage: Storage, audioStorage: AudioDAL) => {
   // @TODO: create a session ID to return back and create a room
   const createSession = () => {
     socket.emit(events.CLOCK_PING, {
@@ -17,8 +18,8 @@ const sessionHandlers = (io: Server, socket: Socket, storage: Storage) => {
   };
 
   const deleteSession = (sessionID: string) => {
-    // @TODO: delete all of the data from redis
-    // THIS IS A BIG DEAL. Need to refactor with a DAL.
+    audioStorage.deleteAll(sessionID);
+    storage.del(`${sessionID}-clock`); // @TODO refactor with dal
     storage.del(sessionID);
     io.to(sessionID).emit(events.SESSION_DELETE);
   };

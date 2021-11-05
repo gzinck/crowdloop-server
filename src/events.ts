@@ -5,6 +5,7 @@ export const AUDIO_DELETE = 'audio:delete';
 export const AUDIO_CREATE = 'audio:create';
 export const AUDIO_SET = 'audio:set';
 // Audio events -- open
+export const AUDIO_REFRESH = 'audio:refresh';
 export const AUDIO_LIST = 'audio:list';
 export const AUDIO_PLAY_LIST = 'audio:playlist';
 export const AUDIO_GET = 'audio:get';

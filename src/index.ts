@@ -1,6 +1,7 @@
 import { Server, Socket } from 'socket.io';
 import { createServer } from 'http';
 import Storage from './adapters/Storage';
+import audioDAL from './dal/audio';
 import * as events from './events';
 import audioHandlers from './handlers/audioHandlers';
 import clockHandlers from './handlers/clockHandlers';
@@ -11,17 +12,18 @@ const port = 2000; // default port to listen
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'http://localhost:3001'],
     methods: ['GET', 'POST'],
   },
 });
 
 const storage = new Storage();
+const audioStorage = audioDAL(storage);
 
 const onConnection = (socket: Socket) => {
-  const audio = audioHandlers(io, socket, storage);
+  const audio = audioHandlers(io, socket, audioStorage);
   const clock = clockHandlers(io, socket, storage);
-  const session = sessionHandlers(io, socket, storage);
+  const session = sessionHandlers(io, socket, storage, audioStorage);
 
   // Audio routes -- closed
   socket.on(events.AUDIO_PLAY, audio.playAudio);
@@ -31,10 +33,7 @@ const onConnection = (socket: Socket) => {
   socket.on(events.AUDIO_SET, audio.setAudio);
 
   // Audio routes -- open
-  socket.on(events.AUDIO_LIST, audio.listAudio);
-  socket.on(events.AUDIO_PLAY_LIST, audio.playListAudio);
-  socket.on(events.AUDIO_META_GET, audio.getAudioMeta);
-  socket.on(events.AUDIO_GET, audio.getAudio);
+  socket.on(events.AUDIO_REFRESH, audio.refresh);
 
   // Clock routes -- closed
   socket.on(events.CLOCK_HOST_PONG, clock.hostPong);

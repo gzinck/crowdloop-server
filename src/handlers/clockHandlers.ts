@@ -8,7 +8,7 @@ interface PongReq {
   clientTime: number;
 }
 
-const getClockID = (sessionID: string) => `clock-${sessionID}`;
+const getClockID = (sessionID: string) => `${sessionID}-clock`;
 
 const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
   // Make sure the host calls this before any clients do
@@ -37,7 +37,7 @@ const clockHandlers = (io: Server, socket: Socket, storage: Storage) => {
 
     storage.get(getClockID(req.sessionID)).then((data) => {
       const hostDelta = +data;
-      socket.to(socket.id).emit(events.CLOCK_GET, clientDelta - hostDelta);
+      socket.emit(events.CLOCK_GET, clientDelta - hostDelta);
     });
   };
 
