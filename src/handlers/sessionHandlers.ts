@@ -39,17 +39,14 @@ const sessionHandlers = (
     sessionStorage.deleteSession(sessionID);
 
     // Delete the positions of everybody
-    io.in(sessionID).allSockets().then((members) => {
-      audienceStorage.deletePosition(...members);
-    });
+    io.in(sessionID)
+      .allSockets()
+      .then((members) => {
+        audienceStorage.deletePosition(...members);
+      });
 
     // Notify everybody the session is over
     io.to(sessionID).emit(events.SESSION_DELETE);
-
-    // Notify the host that there is one fewer member
-    sessionStorage.getHost(sessionID).then((host) => {
-      io.to(host).emit(events.SESSION_DELETE);
-    });
   };
 
   const leaveAllSessions = () => {
@@ -61,7 +58,11 @@ const sessionHandlers = (
         // leave the session
         sessionStorage.removeFromSession(sessionID, socket.id);
         audienceStorage.deletePosition(socket.id);
-        io.to(sessionID).emit(events.AUDIENCE_DISCONNECT);
+
+        // Notify the host that there is one fewer member
+        sessionStorage.getHost(sessionID).then((host) => {
+          io.to(host).emit(events.AUDIENCE_DISCONNECT, socket.id);
+        });
       }
     }
   };

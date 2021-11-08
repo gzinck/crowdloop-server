@@ -38,7 +38,7 @@ const onConnection = (socket: Socket) => {
     clockStorage,
     audienceStorage,
   );
-  const audience = audienceHandlers(io, socket, audienceStorage);
+  const audience = audienceHandlers(io, socket, audienceStorage, sessionStorage);
 
   // Audio routes -- closed
   socket.on(events.AUDIO_PLAY, audio.playAudio);
