@@ -13,7 +13,12 @@ interface PongReq {
 
 const NUM_PONGS = 5;
 
-const clockHandlers = (io: Server, socket: Socket, clockStorage: ClockDAL, sessionStorage: SessionDAL) => {
+const clockHandlers = (
+  io: Server,
+  socket: Socket,
+  clockStorage: ClockDAL,
+  sessionStorage: SessionDAL,
+) => {
   // Make sure the host calls this before any clients do
   const getClock = () => {
     socket.emit(events.CLOCK_PING, {
@@ -37,7 +42,7 @@ const clockHandlers = (io: Server, socket: Socket, clockStorage: ClockDAL, sessi
 
       // Start updating all clients in the session
       sessionStorage.getSessionMembers(req.sessionID).then((members) => {
-        members.forEach(socketID => {
+        members.forEach((socketID) => {
           io.to(socketID).emit(events.CLOCK_PING, {
             startTime: performance.now(),
           });

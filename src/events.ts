@@ -4,6 +4,7 @@ export const AUDIO_STOP = 'audio:stop';
 export const AUDIO_DELETE = 'audio:delete';
 export const AUDIO_CREATE = 'audio:create';
 export const AUDIO_SET = 'audio:set';
+export const AUDIO_MOVE = 'audio:move';
 // Audio events -- open
 export const AUDIO_REFRESH = 'audio:refresh';
 export const AUDIO_LIST = 'audio:list';
@@ -22,3 +23,8 @@ export const SESSION_CREATE = 'session:create';
 export const SESSION_JOIN = 'session:join';
 export const SESSION_DELETE = 'session:delete';
 export const DISCONNECTING = 'disconnecting';
+
+// Audience events
+export const AUDIENCE_POS_SET = 'audience:pos:set';
+export const AUDIENCE_POS_LIST = 'audience:pos:list';
+export const AUDIENCE_DISCONNECT = 'audience:disconnect';

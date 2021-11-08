@@ -27,8 +27,12 @@ class Storage {
     return this.store.get(key);
   }
 
-  public del(key: string) {
-    return this.store.del(key);
+  public getAll(keys: string[]): Promise<string[]> {
+    return this.store.mget(keys);
+  }
+
+  public del(...keys: string[]) {
+    return this.store.del(keys);
   }
 
   public getBuffer(key: string): Promise<Buffer> {

@@ -7,6 +7,7 @@ import {
   CreateAudioRequest,
   AudioPacket,
   AudioPacketMetadata,
+  MoveAudioRequest,
 } from '../models/audio';
 
 export interface AudioDAL {
@@ -14,6 +15,7 @@ export interface AudioDAL {
   stopPlaying: (req: AudioID) => void;
   createAudio: (req: CreateAudioRequest) => void;
   setAudio: (req: AudioPacket) => void;
+  move: (req: MoveAudioRequest) => void;
   deleteAudio: (req: AudioID) => void;
   deleteAll: (sessionID: string) => void;
   listAudio: (sessionID: string) => Promise<string[]>;
@@ -62,6 +64,14 @@ const audioDAL = (storage: Storage): AudioDAL => {
 
     storage.set(`${id}-meta`, JSON.stringify(req.meta));
     storage.set(id, Buffer.from(req.file));
+  };
+
+  const move = (req: MoveAudioRequest): void => {
+    getAudioMeta(req)
+      .then((meta) => createAudio({ ...meta, ...req }))
+      .catch((err) => {
+        Logger.warning(`could not move loop ${req.loopID}: ${err}`);
+      });
   };
 
   const getAudioMeta = (req: AudioID): Promise<CreateAudioRequest> => {
@@ -131,6 +141,7 @@ const audioDAL = (storage: Storage): AudioDAL => {
     stopPlaying,
     createAudio,
     setAudio,
+    move,
     deleteAudio,
     deleteAll,
     listAudio,

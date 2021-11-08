@@ -7,12 +7,21 @@ export interface AudioPlayRequest extends AudioID {
   startTime: number;
 }
 
+export interface MoveAudioRequest extends AudioID {
+  x: number;
+  y: number;
+  radius: number;
+}
+
 export interface CreateAudioRequest extends AudioID {
   startAt: number;
   nPackets: number;
   bpbar: number; // beats per bar
   bpm: number; // beats per minute
   nBars: number; // number of bars in new loops
+  x: number;
+  y: number;
+  radius: number;
   isStopped?: boolean;
 }
 

@@ -1,6 +1,12 @@
 import { Server, Socket } from 'socket.io';
 import { AudioDAL } from '../dal/audio';
-import { AudioID, AudioPlayRequest, CreateAudioRequest, AudioPacket } from '../models/audio';
+import {
+  AudioID,
+  AudioPlayRequest,
+  CreateAudioRequest,
+  AudioPacket,
+  MoveAudioRequest,
+} from '../models/audio';
 import * as events from '../events';
 
 /**
@@ -28,6 +34,11 @@ const audioHandlers = (io: Server, socket: Socket, dal: AudioDAL) => {
   const setAudio = (req: AudioPacket): void => {
     dal.setAudio(req);
     io.to(req.sessionID).emit(events.AUDIO_SET, req);
+  };
+
+  const moveAudio = (req: MoveAudioRequest): void => {
+    dal.move(req);
+    io.to(req.sessionID).emit(events.AUDIO_MOVE, req);
   };
 
   const deleteAudio = (req: AudioID): void => {
@@ -59,6 +70,7 @@ const audioHandlers = (io: Server, socket: Socket, dal: AudioDAL) => {
     stopAudio,
     createAudio,
     setAudio,
+    moveAudio,
     deleteAudio,
     refresh,
   };
