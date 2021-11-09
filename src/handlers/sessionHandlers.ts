@@ -24,7 +24,7 @@ const sessionHandlers = (
     sessionStorage
       .getSessionMembers(sessionID)
       .then((ids) => audienceStorage.listPositions(ids))
-      .then((posList) => io.to(sessionID).emit(events.AUDIENCE_POS_LIST, posList));
+      .then((posList) => io.to(socket.id).emit(events.AUDIENCE_POS_LIST, posList));
   };
 
   // @TODO: make sure the room exists

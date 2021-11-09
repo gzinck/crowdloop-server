@@ -53,6 +53,12 @@ const audioHandlers = (io: Server, socket: Socket, dal: AudioDAL) => {
       // Get each audio file
       audioIDs.forEach((loopID) => {
         dal.getAudioMeta({ sessionID, loopID }).then((meta) => {
+          // If the meta does not exist, we should remove it from the session
+          if (!meta) {
+            dal.deleteAudio({ sessionID, loopID });
+            return;
+          }
+
           socket.emit(events.AUDIO_CREATE, meta);
           // Cycle through all the audio files and send them back
           for (let packet = 0; packet < meta.nPackets; packet++) {

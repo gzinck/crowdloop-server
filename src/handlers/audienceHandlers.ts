@@ -14,12 +14,15 @@ const audienceHandlers = (
   audienceStorage: AudienceDAL,
   sessionStorage: SessionDAL,
 ) => {
-  const setPosition = (pos: AudiencePosReq) => {
-    audienceStorage.setPosition(pos);
+  const setPosition = (pos: Omit<AudiencePosReq, 'id'>) => {
+    audienceStorage.setPosition({
+      ...pos,
+      id: socket.id,
+    });
 
     // Tell the host the position
     sessionStorage.getHost(pos.sessionID).then((host) => {
-      io.to(host).emit(events.AUDIENCE_POS_SET, pos);
+      io.to(host).emit(events.AUDIENCE_POS_SET, { ...pos, id: socket.id });
     });
   };
 

@@ -87,6 +87,8 @@ const audioDAL = (storage: Storage): AudioDAL => {
     const id = getAudioID(req.sessionID, req.loopID);
     Logger.warning(`deleting ${id}`);
     getAudioMeta(req).then((meta) => {
+      if (!meta) return;
+
       // Delete each audio packet and corresponding metadata
       for (let i = 0; i < meta.nPackets; i++) {
         const packetID = getAudioID(req.sessionID, req.loopID, i);

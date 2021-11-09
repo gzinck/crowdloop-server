@@ -28,11 +28,12 @@ class Storage {
   }
 
   public getAll(keys: string[]): Promise<string[]> {
-    return this.store.mget(keys);
+    if (keys.length === 0) return new Promise((r) => r([]));
+    return this.store.mget(keys).then((values) => values.filter((v) => v !== null));
   }
 
-  public del(...keys: string[]) {
-    return this.store.del(keys);
+  public del(...keys: string[]): void {
+    if (keys.length > 0) this.store.del(keys);
   }
 
   public getBuffer(key: string): Promise<Buffer> {

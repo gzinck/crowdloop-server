@@ -7,10 +7,6 @@ export const AUDIO_SET = 'audio:set';
 export const AUDIO_MOVE = 'audio:move';
 // Audio events -- open
 export const AUDIO_REFRESH = 'audio:refresh';
-export const AUDIO_LIST = 'audio:list';
-export const AUDIO_PLAY_LIST = 'audio:playlist';
-export const AUDIO_GET = 'audio:get';
-export const AUDIO_META_GET = 'audio:meta:get';
 
 // Clock events
 export const CLOCK_GET = 'clock:get';
@@ -28,3 +24,9 @@ export const DISCONNECTING = 'disconnecting';
 export const AUDIENCE_POS_SET = 'audience:pos:set';
 export const AUDIENCE_POS_LIST = 'audience:pos:list';
 export const AUDIENCE_DISCONNECT = 'audience:disconnect';
+
+// BELOW ARE DEPRECATED
+export const AUDIO_LIST = 'audio:list';
+export const AUDIO_PLAY_LIST = 'audio:playlist';
+export const AUDIO_GET = 'audio:get';
+export const AUDIO_META_GET = 'audio:meta:get';

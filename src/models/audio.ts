@@ -35,6 +35,6 @@ export interface AudioPacketMetadata {
 }
 
 export interface AudioPacket extends AudioPacketID {
-  file: ArrayBuffer;
+  file: Uint8Array;
   meta: AudioPacketMetadata;
 }
