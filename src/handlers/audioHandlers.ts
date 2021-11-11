@@ -1,5 +1,6 @@
 import { Server, Socket } from 'socket.io';
 import { AudioDAL } from '../dal/audio';
+import { convertToAAC } from '../services/audioConverter';
 import {
   AudioID,
   AudioPlayRequest,
@@ -32,8 +33,11 @@ const audioHandlers = (io: Server, socket: Socket, dal: AudioDAL) => {
   };
 
   const setAudio = (req: AudioPacket): void => {
-    dal.setAudio(req);
-    io.to(req.sessionID).emit(events.AUDIO_SET, req);
+    convertToAAC(new Buffer(req.file)).then((buff) => {
+      req.file = buff;
+      dal.setAudio(req);
+      io.to(req.sessionID).emit(events.AUDIO_SET, req);
+    });
   };
 
   const moveAudio = (req: MoveAudioRequest): void => {

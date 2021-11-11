@@ -18,6 +18,12 @@ You will also need to run a redis server locally. Install redis with the followi
 brew install redis
 ```
 
+Finally, to support all browsers, we need to be able to convert webm to mp4 with ffmpeg.
+
+```
+brew install ffmpeg
+```
+
 ## Usage
 
 Start up redis in a new terminal with `redis-server` and run the following to
