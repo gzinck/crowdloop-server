@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Server for a distributed loop pedal that plays back through audience phones",
   "main": "dist/index.js",
+  "bin": {
+    "server": "./bin/server"
+  },
   "scripts": {
     "build": "tsc",
     "start": "node .",
@@ -16,14 +19,7 @@
     "type": "git",
     "url": "git+https://github.com/gzinck/crowdloop-server.git"
   },
-  "keywords": [
-    "music",
-    "audience",
-    "participation",
-    "performance",
-    "live",
-    "coding"
-  ],
+  "keywords": ["music", "audience", "participation", "performance", "live", "coding"],
   "author": "Graeme Zinck",
   "license": "ISC",
   "bugs": {

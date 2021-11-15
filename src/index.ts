@@ -21,14 +21,14 @@ Logger.info(`server is configured for CORS origins: ${origin}`);
 Logger.info('to change, edit the env HOST1 and HOST2 variables');
 
 const port = 2000; // default port to listen
-// If a key and cert is provided, then 
-const server =
-  process.env.KEY && process.env.CERT
-    ? createServerHTTPS({
-        key: readFileSync(process.env.KEY),
-        cert: readFileSync(process.env.CERT),
-      })
-    : createServerHTTP();
+// If a key and cert is provided, then use HTTPS
+const isHTTPS = process.env.KEY && process.env.CERT;
+const server = isHTTPS
+  ? createServerHTTPS({
+      key: readFileSync(process.env.KEY),
+      cert: readFileSync(process.env.CERT),
+    })
+  : createServerHTTP();
 
 const io = new Server(server, {
   cors: {
@@ -89,5 +89,5 @@ const onConnection = (socket: Socket) => {
 io.on('connection', onConnection);
 
 server.listen(port, () => {
-  Logger.info(`HTTPS server running on port ${port}`);
+  Logger.info(`${isHTTPS ? 'HTTPS' : 'HTTP'} server running on port ${port}`);
 });
