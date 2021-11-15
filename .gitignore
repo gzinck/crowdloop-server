@@ -30,3 +30,6 @@ yarn-error.log*
 
 # redis
 dump.rdb
+
+# env
+.env

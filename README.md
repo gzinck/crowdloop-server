@@ -41,3 +41,20 @@ npm run start
 ```
 
 The compiled code is in `dist/`.
+
+## Distribution
+
+To deploy, do the following:
+
+1. Install ffmpeg, redis, nvm, node.
+2. Point DNS to server.
+3. Get an HTTPS certificate via Let's Encrypt.
+4. Configure the following four environment variables before running:
+```
+CERT='/etc/letsencrypt/live/server.crowdloop.ca/fullchain.pem'
+KEY='/etc/letsencrypt/live/server.crowdloop.ca/privkey.pem'
+HOST1='https://crowdloop.ca'
+HOST2='https://perform.crowdloop.ca'
+```
+
+

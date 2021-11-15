@@ -1,6 +1,9 @@
 import { Server, Socket } from 'socket.io';
-import { createServer } from 'http';
+import { readFileSync } from 'fs';
+import { createServer as createServerHTTPS } from 'https';
+import { createServer as createServerHTTP } from 'http';
 import Storage from './adapters/Storage';
+import Logger from './adapters/Logger';
 import audioDAL from './dal/audio';
 import clockDAL from './dal/clock';
 import sessionDAL from './dal/session';
@@ -11,12 +14,25 @@ import clockHandlers from './handlers/clockHandlers';
 import sessionHandlers from './handlers/sessionHandlers';
 import audienceHandlers from './handlers/audienceHandlers';
 
+const origin = ['http://localhost:3000', 'http://localhost:3001'];
+if (process.env.HOST1) origin.push(process.env.HOST1);
+if (process.env.HOST2) origin.push(process.env.HOST2);
+Logger.info(`server is configured for CORS origins: ${origin}`);
+Logger.info('to change, edit the env HOST1 and HOST2 variables');
+
 const port = 2000; // default port to listen
-// @TODO: switch to HTTPS https://socket.io/docs/v3/server-initialization/#with-an-https-server
-const httpServer = createServer();
-const io = new Server(httpServer, {
+// If a key and cert is provided, then 
+const server =
+  process.env.KEY && process.env.CERT
+    ? createServerHTTPS({
+        key: readFileSync(process.env.KEY),
+        cert: readFileSync(process.env.CERT),
+      })
+    : createServerHTTP();
+
+const io = new Server(server, {
   cors: {
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin,
     methods: ['GET', 'POST'],
   },
 });
@@ -72,4 +88,4 @@ const onConnection = (socket: Socket) => {
 
 io.on('connection', onConnection);
 
-httpServer.listen(port);
+server.listen(port);
