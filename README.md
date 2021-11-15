@@ -51,10 +51,10 @@ To deploy, do the following:
 3. Get an HTTPS certificate via Let's Encrypt.
 4. Configure the following four environment variables before running:
 ```
-CERT='/etc/letsencrypt/live/server.crowdloop.ca/fullchain.pem'
-KEY='/etc/letsencrypt/live/server.crowdloop.ca/privkey.pem'
-HOST1='https://crowdloop.ca'
-HOST2='https://perform.crowdloop.ca'
+export CERT='/home/ec2-user/ssl/fullchain.pem'
+export KEY='/home/ec2-user/ssl/privkey.pem'
+export HOST1='https://crowdloop.ca'
+export HOST2='https://perform.crowdloop.ca'
 ```
 
 

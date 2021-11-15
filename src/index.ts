@@ -88,4 +88,6 @@ const onConnection = (socket: Socket) => {
 
 io.on('connection', onConnection);
 
-server.listen(port);
+server.listen(port, () => {
+  Logger.info(`HTTPS server running on port ${port}`);
+});
