@@ -49,12 +49,12 @@ To deploy, do the following:
 1. Install ffmpeg, redis, nvm, node.
 2. Point DNS to server.
 3. Get an HTTPS certificate via Let's Encrypt.
-4. Configure the following four environment variables before running:
+4. Configure the following environment variables before running:
 ```
-export CERT='/home/ec2-user/ssl/fullchain.pem'
-export KEY='/home/ec2-user/ssl/privkey.pem'
 export HOST1='https://crowdloop.ca'
 export HOST2='https://perform.crowdloop.ca'
 ```
+5. Run Apache httpd on port 443 and forward that to the server on port 2000.
 
+For more detailed instructions, read [DEPLOY.md](DEPLOY.md).
 
