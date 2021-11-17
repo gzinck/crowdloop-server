@@ -74,10 +74,12 @@ const clockHandlers = (
         socket.emit(events.CLOCK_GET, meanDelta - hostDelta);
       });
     } else {
-      socket.emit(events.CLOCK_PING, {
-        startTime: performance.now(),
-        deltas,
-      });
+      setTimeout(() => {
+        socket.emit(events.CLOCK_PING, {
+          startTime: performance.now(),
+          deltas,
+        });
+      }, PONG_PAUSE);
     }
   };
 
