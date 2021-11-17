@@ -2,6 +2,7 @@ import { Server, Socket } from 'socket.io';
 import Logger from '../adapters/Logger';
 import { ClockDAL } from '../dal/clock';
 import { SessionDAL } from '../dal/session';
+import { removeOutliers, median } from '../utils/math';
 import * as events from '../events';
 
 interface PongReq {
@@ -12,6 +13,7 @@ interface PongReq {
 }
 
 const NUM_PONGS = 5;
+const PONG_PAUSE = 1000;
 
 const clockHandlers = (
   io: Server,
@@ -37,8 +39,8 @@ const clockHandlers = (
     const deltas = [...(req.deltas || []), hostDelta];
     Logger.info(`host pong has deltas ${deltas}`);
     if (deltas.length === NUM_PONGS) {
-      const avgDelta = deltas.reduce((sm, a) => sm + a, 0) / NUM_PONGS;
-      clockStorage.setHostDelta(req.sessionID, avgDelta);
+      const meanDelta = median(removeOutliers(deltas));
+      clockStorage.setHostDelta(req.sessionID, meanDelta);
 
       // Start updating all clients in the session
       sessionStorage.getSessionMembers(req.sessionID).then((members) => {
@@ -49,10 +51,12 @@ const clockHandlers = (
         });
       });
     } else {
-      socket.emit(events.CLOCK_PING, {
-        startTime: performance.now(),
-        deltas,
-      });
+      setTimeout(() => {
+        socket.emit(events.CLOCK_PING, {
+          startTime: performance.now(),
+          deltas,
+        });
+      }, PONG_PAUSE);
     }
   };
 
@@ -65,9 +69,9 @@ const clockHandlers = (
     const deltas = [...(req.deltas || []), clientDelta];
     Logger.info(`client pong has deltas ${deltas}`);
     if (deltas.length === NUM_PONGS) {
-      const avgDelta = deltas.reduce((sm, a) => sm + a, 0) / NUM_PONGS;
+      const meanDelta = median(removeOutliers(deltas));
       clockStorage.getHostDelta(req.sessionID).then((hostDelta) => {
-        socket.emit(events.CLOCK_GET, avgDelta - hostDelta);
+        socket.emit(events.CLOCK_GET, meanDelta - hostDelta);
       });
     } else {
       socket.emit(events.CLOCK_PING, {
