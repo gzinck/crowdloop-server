@@ -12,7 +12,8 @@ interface PongReq {
   clientTime: number;
 }
 
-const NUM_PONGS = 5;
+const NUM_PONGS_ROUND_1 = 5;
+const NUM_PONGS = 10;
 const PONG_PAUSE = 1000;
 
 const clockHandlers = (
@@ -38,7 +39,9 @@ const clockHandlers = (
 
     const deltas = [...(req.deltas || []), hostDelta];
     Logger.info(`host pong has deltas ${deltas}`);
-    if (deltas.length === NUM_PONGS) {
+
+    // Send the updated clock after 10 pings (more pings = more time, but more consistent)
+    if (deltas.length >= NUM_PONGS) {
       const meanDelta = median(removeOutliers(deltas));
       clockStorage.setHostDelta(req.sessionID, meanDelta);
 
@@ -68,12 +71,17 @@ const clockHandlers = (
 
     const deltas = [...(req.deltas || []), clientDelta];
     Logger.info(`client pong has deltas ${deltas}`);
-    if (deltas.length === NUM_PONGS) {
+
+    // Send the updated clock after 5 or 10 tries
+    if (deltas.length >= NUM_PONGS || deltas.length === NUM_PONGS_ROUND_1) {
       const meanDelta = median(removeOutliers(deltas));
       clockStorage.getHostDelta(req.sessionID).then((hostDelta) => {
         socket.emit(events.CLOCK_GET, meanDelta - hostDelta);
       });
-    } else {
+    }
+
+    // Keep pinging
+    if (deltas.length < NUM_PONGS) {
       setTimeout(() => {
         socket.emit(events.CLOCK_PING, {
           startTime: performance.now(),
